@@ -28,7 +28,7 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function (err) {
     if (err) throw err;
-    // console.log("connected as id" + database)
+    // console.log("connected as id" + database
     //   run the chooseProduct function after the connection is made to prompt the user
     first();
 });
@@ -36,85 +36,83 @@ connection.connect(function (err) {
 // they can now choose a product
 
 function first() {
-    connection.query("SELECT item_id, whatsForSale, price, theAmountofStevesStuff FROM products WHERE department_name = ?", ['clothing'], function(err, res){
+    connection.query("SELECT * FROM products", function(err, res){
         if (err) throw err;
         console.table(res)
-    
+        chooseProduct(res)
     });
     };
-
-
 // another finction for actually selecting the item
-function chooseProduct() {
+function chooseProduct(inventory) {
+    var forSale = []
+    for (var i = 0; i < inventory.length; i++){
+        forSale.push(inventory[i].whatsForSale)
+    }
     inquirer
         .prompt({
             name: "order something",
             type: 'checkbox',
             message: "What would you like to order?",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                };
-                return false;
-            }
-            //   choices: ["How to connect list of choices from csv or schema??"]
+              choices: forSale
+        }).then(function (res){
+            console.log(res)
+            inquirer
+                .prompt([{
+                        name: "choice",
+                        type: 'checkbox',
+                        message: "What is the number associated with Steve's Product you want to buy?\n",
+                        choices: function () {
+                            var whatsForSale = [];
+                            for (var i = 0; i < res.length; i++) {
+                                whatsForSale.push(res[i].name);
+                            }
+                            return whatsForSale;
+                        }},
+                    {
+                        name: "theAmountofStevesStuff",
+                        type: 'checkbox',
+                        message: "How many of Steve's Stuff would you like to buy?",
+                        validate: function (value) {
+                            if (isNaN(value) === false) {
+                                return true;
+                            };
+                            return false;
+                        }
+                    }])
+            
+            
+                .then(function (answer) {
+                    //run table of all data about Steve's product
+                    var iChooseYou;
+                    for (var i = 0; i < res.length; i++) {
+                        if (res[i].name === answer.choice) {
+                            iChooseYou = res[i];
+                        }};
+            
+                    if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
+                        connection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [{ stock_quantity: (iChooseYou.stock_quantity - answer.theAmountofStevesStuff) },
+                            { item_id: iChooseYou.item_id }
+                            ],
+            
+                            function (err, res) {
+                                if (err) throw err;
+            
+                                console.log((iChooseYou.price * answer.theAmountofStevesStuff) + "\n")
+                                console.log("Thank you for ordering something from Steve")
+            
+                                connection.end();
+                            });
+                    } else {
+                        console.log("Steve apologizes. We don't have enough of that product in stock right now")
+                        chooseProduct();
+                        // i want to learn how to put this all into html so badly
+                        // so i can alert them that i don't have enough of an item instead of console logging it
+                    }
         })
 
 
-inquirer
-    .prompt([{
-            name: "choice",
-            type: 'checkbox',
-            message: "What is the number associated with Steve's Product you want to buy?\n",
-            choices: function () {
-                var whatsForSale = [];
-                for (var i = 0; i < res.length; i++) {
-                    whatsForSale.push(res[i].name);
-                }
-                return whatsForSale;
-            }},
-        {
-            name: "theAmountofStevesStuff",
-            type: 'checkbox',
-            message: "How many of Steve's Stuff would you like to buy?",
-            validate: function (value) {
-                if (isNaN(value) === false) {
-                    return true;
-                };
-                return false;
-            }
-        }])
-
-
-    .then(function (answer) {
-        //run table of all data about Steve's product
-        var iChooseYou;
-        for (var i = 0; i < res.length; i++) {
-            if (res[i].name === answer.choice) {
-                iChooseYou = res[i];
-            }};
-
-        if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
-            connection.query(
-                "UPDATE products SET ? WHERE ?",
-                [{ stock_quantity: (iChooseYou.stock_quantity - answer.theAmountofStevesStuff) },
-                { item_id: iChooseYou.item_id }
-                ],
-
-                function (err, res) {
-                    if (err) throw err;
-
-                    console.log((iChooseYou.price * answer.theAmountofStevesStuff) + "\n")
-                    console.log("Thank you for ordering something from Steve")
-
-                    connection.end();
-                });
-        } else {
-            console.log("Steve apologizes. We don't have enough of that product in stock right now")
-            chooseProduct();
-            // i want to learn how to put this all into html so badly
-            // so i can alert them that i don't have enough of an item instead of console logging it
-        }
     });
 //   });
 // };ba
