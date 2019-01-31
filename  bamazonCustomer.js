@@ -15,151 +15,106 @@ var inquirer = require("inquirer");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
-  host: "localhost",
-  // Your port; if not 3306
-  port: 3306,
-  // Your username
-  user: "root",
-  // Your password
-  password: "root",
-  database: "bamazon"
+    host: "localhost",
+    // Your port; if not 3306
+    port: 3306,
+    // Your username
+    user: "root",
+    // Your password
+    password: "root",
+    database: "bamazon_db"
 });
 
 // connect to the mysql server and sql database
-connection.connect(function(err) {
-  if (err) throw err;
-  // run the start function after the connection is made to prompt the user
-  start();
+connection.connect(function (err) {
+    if (err) throw err;
+    //   run the chooseProduct function after the connection is made to prompt the user
+    chooseProduct();
 });
 
-// function which prompts the user for what action they should take
-function start() {
-  inquirer
-    .prompt({
-      name: "postOrBid",
-      type: "list",
-      message: "Would you like to [POST] an auction or [BID] on an auction?",
-      choices: ["POST", "BID", "EXIT"]
-    })
-    .then(function(answer) {
-      // based on their answer, either call the bid or the post functions
-      if (answer.postOrBid === "POST") {
-        postAuction();
-      }
-      else if(answer.postOrBid === "BID") {
-        bidAuction();
-      } else{
-        connection.end();
-      }
-    });
-}
+// they can now choose a product
 
-// function to handle posting new items up for auction
-function postAuction() {
-  // prompt for info about the item being put up for auction
-  inquirer
-    .prompt([
-      {
-        name: "item",
-        type: "input",
-        message: "What is the item you would like to submit?"
-      },
-      {
-        name: "category",
-        type: "input",
-        message: "What category would you like to place your auction in?"
-      },
-      {
-        name: "startingBid",
-        type: "input",
-        message: "What would you like your starting bid to be?",
-        validate: function(value) {
-          if (isNaN(value) === false) {
-            return true;
-          }
-          return false;
-        }
-      }
-    ])
-    .then(function(answer) {
-      // when finished prompting, insert a new item into the db with that info
-      connection.query(
-        "INSERT INTO auctions SET ?",
-        {
-          item_name: answer.item,
-          category: answer.category,
-          starting_bid: answer.startingBid || 0,
-          highest_bid: answer.startingBid || 0
-        },
-        function(err) {
-          if (err) throw err;
-          console.log("Your auction was created successfully!");
-          // re-prompt the user for if they want to bid or post
-          start();
-        }
-      );
-    });
-}
-
-function bidAuction() {
-  // query the database for all items being auctioned
-  connection.query("SELECT * FROM auctions", function(err, results) {
-    if (err) throw err;
-    // once you have the items, prompt the user for which they'd like to bid on
+function chooseProduct() {
     inquirer
-      .prompt([
-        {
-          name: "choice",
-          type: "rawlist",
-          choices: function() {
-            var choiceArray = [];
-            for (var i = 0; i < results.length; i++) {
-              choiceArray.push(results[i].item_name);
-            }
-            return choiceArray;
-          },
-          message: "What auction would you like to place a bid in?"
-        },
-        {
-          name: "bid",
-          type: "input",
-          message: "How much would you like to bid?"
-        }
-      ])
-      .then(function(answer) {
-        // get the information of the chosen item
-        var chosenItem;
-        for (var i = 0; i < results.length; i++) {
-          if (results[i].item_name === answer.choice) {
-            chosenItem = results[i];
-          }
-        }
+        .prompt({
+            name: "order something",
+            type: 'checkbox',
+            message: "What would you like to order?",
+            //   choices: ["How to connect list of choices from csv or schema??"]
+        })};
 
-        // determine if bid was high enough
-        if (chosenItem.highest_bid < parseInt(answer.bid)) {
-          // bid was high enough, so update db, let the user know, and start over
-          connection.query(
-            "UPDATE auctions SET ? WHERE ?",
-            [
-              {
-                highest_bid: answer.bid
-              },
-              {
-                id: chosenItem.id
-              }
-            ],
-            function(error) {
-              if (error) throw err;
-              console.log("Bid placed successfully!");
-              start();
+inquirer
+    .prompt([{
+            name: "choice",
+            type: 'checkbox',
+            message: "What is the number associated with Steve's Product you want to buy?\n",
+            choices: function () {
+                var whatsForSale = [];
+                for (var i = 0; i < res.length; i++) {
+                    whatsForSale.push(res[i].name);
+                }
+                return whatsForSale;
+            }},
+        {
+            name: "theAmountofStevesStuff",
+            type: 'checkbox',
+            message: "How many of Steve's Stuff would you like to buy?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
+                };
+                return false;
             }
-          );
+        }])
+
+
+    .then(function (answer) {
+        //run table of all data about Steve's product
+        var iChooseYou;
+        for (var i = 0; i < res.length; i++) {
+            if (res[i].name === answer.choice) {
+                iChooseYou = res[i];
+            }
+        };
+
+        if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
+            connection.query(
+                "UPDATE products SET ? WHERE ?",
+                [{ stock_quantity: (iChooseYou.stock_quantity - answer.theAmountofStevesStuff) },
+                { item_id: iChooseYou.item_id }
+                ],
+
+                function (err, res) {
+                    if (err) throw err;
+
+                    console.log((iChooseYou.price * answer.theAmountofStevesStuff) + "\n")
+                    console.log("Thank you for ordering something from Steve")
+
+                    connection.end();
+                });
+        } else {
+            console.log("Steve apologizes. We don't have enough of that product in stock right now")
+            chooseProduct();
+            // i want to learn how to put this all into html so badly
+            // so i can alert them that i don't have enough of an item instead of console logging it
         }
-        else {
-          // bid wasn't high enough, so apologize and start over
-          console.log("Your bid was too low. Try again...");
-          start();
-        }
-      });
-  })};
-  
+    });
+//   });
+// };ba
+
+// Steves-MBP-5:Node.js-MySQL sshann30$ node bamazonManager.js
+// Steves-MBP-5:Node.js-MySQL sshann30$
+// aaaaaaand nothing happens... linkage issue? schema vs csv????
+
+//10 o'clock and for some reason this is waht comes up in bash even after deleting previous bash trick like adam taught me
+// Steves-MBP-5:Node.js-MySQL sshann30$ node bamazon
+// bamazonManager.js  bamazon_db.sql
+// Steves-MBP-5:Node.js-MySQL sshann30$ node bamazon
+
+// why can't it auto complete after i press C to signify "Customer.js"???
+// throw err: ????
+
+// Steves-MBP-5:Node.js-MySQL sshann30$ node bamazonCustomer.js
+// internal/modules/cjs/loader.js:605
+//     throw err;
+//     ^
