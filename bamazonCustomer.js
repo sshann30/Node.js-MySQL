@@ -28,20 +28,38 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function (err) {
     if (err) throw err;
+    // console.log("connected as id" + database)
     //   run the chooseProduct function after the connection is made to prompt the user
-    chooseProduct();
+    first();
 });
 
 // they can now choose a product
 
+function first() {
+    connection.query("SELECT * FROM products", function(err, res){
+        if (err) throw err;
+        console.table(res)
+    
+    });
+    };
+
+
+// another finction for actually selecting the item
 function chooseProduct() {
     inquirer
         .prompt({
             name: "order something",
             type: 'checkbox',
             message: "What would you like to order?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
+                };
+                return false;
+            }
             //   choices: ["How to connect list of choices from csv or schema??"]
-        })};
+        })
+
 
 inquirer
     .prompt([{
@@ -74,8 +92,7 @@ inquirer
         for (var i = 0; i < res.length; i++) {
             if (res[i].name === answer.choice) {
                 iChooseYou = res[i];
-            }
-        };
+            }};
 
         if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
             connection.query(
@@ -113,8 +130,8 @@ inquirer
 
 // why can't it auto complete after i press C to signify "Customer.js"???
 // throw err: ????
-
 // Steves-MBP-5:Node.js-MySQL sshann30$ node bamazonCustomer.js
 // internal/modules/cjs/loader.js:605
 //     throw err;
 //     ^
+}

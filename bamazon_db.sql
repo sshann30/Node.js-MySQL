@@ -13,25 +13,37 @@ CREATE TABLE products (
  
 );
 
--- SELECT * FROM bamazon;
--- SELECT top_albums.year, top_albums.album, top_albums.position, top5000.song, top5000.artist 
--- FROM top_albums INNER JOIN top5000
--- ON (top_albums.artist = top5000.artist AND top_albums.year = top5000.year) 
--- WHERE (top_albums.artist = "Celine Dion" AND top5000.artist = "Celine Dion")
--- ORDER BY top_albums.year;
 
 INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
-VALUES: 
+VALUES
 
 ("Steve's Jacket", "Clothing",60,20);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Sock", "Clothing",3,66);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Coffee", "Food",1,99);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's PS4", "Electronics",200,1);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Bed", "Furniture",4,1);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Hat", "Clothing",30,7);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Carpet","Furniture",270,3);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Fridge", "Food",700,2);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Lunch", "Food",1,5);
+INSERT INTO products (whatsForSale, department_name, price, theAmountofStevesStuff)
+VALUES
 ("Steve's Car", "Auto",1000,1);
 
-(SELECT * FROM products;)
+(SELECT * FROM products)
