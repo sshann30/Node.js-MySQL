@@ -36,7 +36,7 @@ connection.connect(function (err) {
 // they can now choose a product
 
 function first() {
-    connection.query("SELECT * FROM products", function(err, res){
+    connection.query("SELECT item_id, whatsForSale, price, theAmountofStevesStuff FROM products WHERE department_name = ?", ['clothing'], function(err, res){
         if (err) throw err;
         console.table(res)
     
