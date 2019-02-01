@@ -50,70 +50,89 @@ function chooseProduct(inventory) {
     }
     inquirer
         .prompt({
-            name: "order something",
+            name: "order",
             type: 'checkbox',
             message: "What would you like to order?",
               choices: forSale
         }).then(function (res){
-            console.log(res)
-            inquirer
-                .prompt([{
-                        name: "choice",
-                        type: 'checkbox',
-                        message: "What is the number associated with Steve's Product you want to buy?\n",
-                        choices: function () {
-                            var whatsForSale = [];
-                            for (var i = 0; i < res.length; i++) {
-                                whatsForSale.push(res[i].name);
-                            }
-                            return whatsForSale;
-                        }},
-                    {
-                        name: "theAmountofStevesStuff",
-                        type: 'checkbox',
-                        message: "How many of Steve's Stuff would you like to buy?",
-                        validate: function (value) {
-                            if (isNaN(value) === false) {
-                                return true;
-                            };
-                            return false;
-                        }
-                    }])
+            
+            buyWhat(0, res.order)
+        //     inquirer
+        //         .prompt([{
+        //                 name: "choice",
+        //                 type: 'checkbox',
+        //                 message: "What is the number associated with Steve's Product you want to buy?\n",
+        //                 choices: function () {
+        //                     var whatsForSale = [];
+        //                     for (var i = 0; i < res.length; i++) {
+        //                         whatsForSale.push(res[i].name);
+        //                     }
+        //                     return whatsForSale;
+        //                 }},
+        //             {
+        //                 name: "theAmountofStevesStuff",
+        //                 type: 'checkbox',
+        //                 message: "How many of Steve's Stuff would you like to buy?",
+        //                 validate: function (value) {
+        //                     if (isNaN(value) === false) {
+        //                         return true;
+        //                     };
+        //                     return false;
+        //                 }
+        //             }])
             
             
-                .then(function (answer) {
-                    //run table of all data about Steve's product
-                    var iChooseYou;
-                    for (var i = 0; i < res.length; i++) {
-                        if (res[i].name === answer.choice) {
-                            iChooseYou = res[i];
-                        }};
+        //         .then(function (answer) {
+        //             //run table of all data about Steve's product
+        //             var iChooseYou;
+        //             for (var i = 0; i < res.length; i++) {
+        //                 if (res[i].name === answer.choice) {
+        //                     iChooseYou = res[i];
+        //                 }};
             
-                    if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
-                        connection.query(
-                            "UPDATE products SET ? WHERE ?",
-                            [{ stock_quantity: (iChooseYou.stock_quantity - answer.theAmountofStevesStuff) },
-                            { item_id: iChooseYou.item_id }
-                            ],
+        //             if (iChooseYou.stock_quantity >= parseInt(answer.theAmountofStevesStuff)) {
+        //                 connection.query(
+        //                     "UPDATE products SET ? WHERE ?",
+        //                     [{ stock_quantity: (iChooseYou.stock_quantity - answer.theAmountofStevesStuff) },
+        //                     { item_id: iChooseYou.item_id }
+        //                     ],
             
-                            function (err, res) {
-                                if (err) throw err;
+        //                     function (err, res) {
+        //                         if (err) throw err;
             
-                                console.log((iChooseYou.price * answer.theAmountofStevesStuff) + "\n")
-                                console.log("Thank you for ordering something from Steve")
+        //                         console.log((iChooseYou.price * answer.theAmountofStevesStuff) + "\n")
+        //                         console.log("Thank you for ordering something from Steve")
             
-                                connection.end();
-                            });
-                    } else {
-                        console.log("Steve apologizes. We don't have enough of that product in stock right now")
-                        chooseProduct();
-                        // i want to learn how to put this all into html so badly
-                        // so i can alert them that i don't have enough of an item instead of console logging it
-                    }
-        })
+        //                         connection.end();
+        //                     });
+        //             } else {
+        //                 console.log("Steve apologizes. We don't have enough of that product in stock right now")
+        //                 chooseProduct();
+        //                 // i want to learn how to put this all into html so badly
+        //                 // so i can alert them that i don't have enough of an item instead of console logging it
+        //             }
+        // })
 
 
     });
+
+    function buyWhat(i, items){
+        inquirer
+            .prompt({
+                name: "quantity",
+                type: 'input',
+                message: "How many of " + items[i] + " would you like to purchase?",
+        }).then(function (res){   
+            if (i < (items.length-1)){
+                buyWhat((i+1), items)
+            } else {
+                console.log('run checkout function')
+            }
+        })
+    }
+
+
+
 //   });
 // };ba
 
